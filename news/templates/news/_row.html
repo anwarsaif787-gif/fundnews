@@ -1,0 +1,20 @@
+<li class="row">
+  <time class="when" datetime="{{ s.published|date:'c' }}">
+    <span class="day">{{ s.published|date:"j M" }}</span>
+    <span class="hm">{{ s.published|date:"H:i" }}</span>
+  </time>
+  <div class="what">
+    <a class="headline" href="{{ s.link }}" target="_blank" rel="noopener">{{ s.title }}</a>
+    <p class="by">
+      <span class="pub">{{ s.publisher }}</span>
+      {% if s.also %}
+        <span class="also">also reported by
+          {% for x in s.also|slice:":3" %}<a href="{{ x.link }}" target="_blank" rel="noopener">{{ x.publisher }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}{% if s.also|length > 3 %} and {{ s.also|length|add:"-3" }} more{% endif %}
+        </span>
+      {% endif %}
+      {% if s.amount_text %}<span class="amt">{{ s.amount_text }}</span>{% endif %}
+      {% if s.category %}<a class="tag" href="/category/{{ s.category.name }}/">{{ s.category.name }}</a>{% endif %}
+      {% if s.market %}<a class="tag tag-line" href="/markets/{{ s.market.slug }}/">{{ s.market.name }}</a>{% endif %}
+    </p>
+  </div>
+</li>

@@ -1,0 +1,21 @@
+{% extends "news/base.html" %}
+
+{% block content %}
+<div class="page prose">
+  <h2>What this site does</h2>
+  <p>Fund News gathers headlines about private markets from many publishers and puts them on one page. We do not write the news. Every headline links to the publisher that wrote it.</p>
+
+  <h2>How this page is made</h2>
+  <p>A program checks {{ source_count }} news feeds on a schedule. New stories are sorted by topic and market, matched to the {{ firm_count }} firms we track, and grouped so that one event shows as one line, with the other publishers listed beside it. The top story is picked from how many publishers covered it, how big the money is and how recent it is.</p>
+  <p>We hold {{ story_count }} stories right now.</p>
+
+  <h2>Things to know</h2>
+  <ul>
+    <li>Sorting and grouping are done by simple rules, so some stories may land in the wrong topic or stay ungrouped.</li>
+    <li>Fund sizes are read from headlines and can be wrong. Check the original story before relying on a number.</li>
+  </ul>
+
+  <h2>Daily email and feed</h2>
+  <p>Subscribe on the <a href="/">home page</a> for the top stories by email, or add our <a href="/feed.xml">RSS feed</a> to your reader.</p>
+</div>
+{% endblock %}

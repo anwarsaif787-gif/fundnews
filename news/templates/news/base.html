@@ -1,0 +1,80 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{% if heading %}{{ heading }} | {% endif %}Fund News{% endblock %}</title>
+  <meta name="description" content="Private markets and fund news from many publishers, in one place.">
+  <link rel="alternate" type="application/rss+xml" title="Fund News" href="/feed.xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'news/style.css' %}">
+</head>
+<body>
+
+<div class="band">
+  <header class="masthead">
+    <a class="brand" href="/">Fund News</a>
+    <nav class="sections" aria-label="Sections">
+      <a href="/" {% if section == 'news' %}aria-current="page"{% endif %}>News</a>
+      <a href="/events/" {% if section == 'events' %}aria-current="page"{% endif %}>Events</a>
+      <a href="/firms/" {% if section == 'firms' %}aria-current="page"{% endif %}>Firms</a>
+      <a href="/closes/" {% if section == 'closes' %}aria-current="page"{% endif %}>Largest closes</a>
+      <a href="/about/" {% if section == 'about' %}aria-current="page"{% endif %}>About</a>
+    </nav>
+    <form class="search" method="get" action="/" role="search">
+      <input type="search" name="q" value="{{ q }}" placeholder="Search headlines" aria-label="Search headlines">
+      <button type="submit">Search</button>
+    </form>
+  </header>
+
+  <nav class="topics" aria-label="Topics">
+    <a href="/" class="{% if section == 'news' and not current and not current_market and not q and mode == 'home' %}is-active{% endif %}">All news</a>
+    {% for c in categories %}
+      <a href="/category/{{ c.name }}/" class="{% if c.name == current %}is-active{% endif %}">{{ c.name }}</a>
+    {% endfor %}
+  </nav>
+  {% if markets %}
+  <nav class="markets" aria-label="Markets">
+    <span>Markets</span>
+    {% for m in markets %}
+      <a href="/markets/{{ m.slug }}/" class="{% if m.slug == current_market %}is-active{% endif %}">{{ m.name }}</a>
+    {% endfor %}
+  </nav>
+  {% endif %}
+
+  {% block hero %}
+    {% if heading %}
+    <section class="hero hero-slim">
+      <h1 class="page-title">{{ heading }}</h1>
+      {% if sub %}<p class="page-sub">{{ sub }}</p>{% endif %}
+    </section>
+    {% endif %}
+  {% endblock %}
+</div>
+
+{% if subscribed == 'ok' %}
+  <div class="banner banner-ok" role="status">You're subscribed. Your email is saved.</div>
+{% elif subscribed == 'invalid' %}
+  <div class="banner banner-bad" role="alert">That email address doesn't look right. Check it and try again.</div>
+{% endif %}
+
+{% block content %}{% endblock %}
+
+<footer class="foot">
+  <div class="foot-inner">
+    <div>
+      <p class="foot-brand">Fund News</p>
+      <p>Headlines belong to their original publishers. We only collect, sort and link to them.</p>
+    </div>
+    <div class="foot-links">
+      <a href="/about/">About</a>
+      <a href="/feed.xml">RSS feed</a>
+      <a href="/admin/">Editor login</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

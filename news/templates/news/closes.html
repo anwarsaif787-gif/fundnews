@@ -1,0 +1,66 @@
+{% extends "news/base.html" %}
+
+{% block content %}
+<div class="page">
+  <p class="switch">
+    <a href="/closes/?days=7" class="{% if days == 7 %}is-active{% endif %}">7 days</a>
+    <a href="/closes/?days=30" class="{% if days == 30 %}is-active{% endif %}">30 days</a>
+    <a href="/closes/?days=90" class="{% if days == 90 %}is-active{% endif %}">90 days</a>
+  </p>
+
+  <section class="totals">
+    <p class="big">{{ total_text }}</p>
+    <p class="big-note">raised across {{ count }} fund close{{ count|pluralize }} in the past {{ days }} days</p>
+  </section>
+
+  {% if bars %}
+  <section class="chart" aria-label="Capital raised by market">
+    <h2>Capital raised, by market</h2>
+    <ul class="bars">
+      {% for b in bars %}
+      <li>
+        <span class="bar-name">{{ b.name }}</span>
+        <span class="bar-track"><span class="bar-fill" style="width: {{ b.pct }}%"></span></span>
+        <span class="bar-val">{{ b.text }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <section class="table-wrap">
+    <h2>Largest closes</h2>
+    <table class="closes">
+      <thead>
+        <tr><th>Fund or manager</th><th>Market</th><th class="num">Size</th><th>Date</th><th class="num">Reports</th></tr>
+      </thead>
+      <tbody>
+        {% for s in rows %}
+        <tr>
+          <td>
+            <a href="{{ s.link }}" target="_blank" rel="noopener">{{ s.title }}</a>
+            <span class="src">{% for f in s.firms.all %}{{ f.name }}{% if not forloop.last %}, {% endif %}{% empty %}{{ s.publisher }}{% endfor %}</span>
+          </td>
+          <td>{{ s.market.name|default:"Other" }}</td>
+          <td class="num"><b>{{ s.amount_text }}</b></td>
+          <td>{{ s.published|date:"j M" }}</td>
+          <td class="num">{{ s.article_count }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+  {% else %}
+  <p class="empty">No fund closes found for this period yet. Collect more news with <code>python manage.py fetch_news</code>.</p>
+  {% endif %}
+
+  <section class="method">
+    <h2>How this is counted</h2>
+    <ul>
+      <li><b>In:</b> stories in the Fundraising topic whose headline says a fund closed, raised or secured money and states a size.</li>
+      <li><b>Out:</b> targets and rumours, such as "eyes" or "targets", until a close is reported.</li>
+      <li><b>One fund, one count:</b> reports of the same event are grouped. When reports give different sizes, the lower one is used.</li>
+      <li><b>Sizes:</b> read from headlines by a simple rule, so some may be wrong. Euros and pounds are converted to dollars at rough fixed rates.</li>
+    </ul>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "news/base.html" %}
+
+{% block content %}
+<div class="page">
+  <p class="switch">
+    <a href="/events/" class="{% if not past %}is-active{% endif %}">Upcoming</a>
+    <a href="/events/?past=1" class="{% if past %}is-active{% endif %}">Past events</a>
+  </p>
+
+  {% regroup events by start_date|date:"F Y" as months %}
+  {% for month in months %}
+  <section class="month">
+    <h2>{{ month.grouper }}</h2>
+    <ul class="event-list">
+      {% for e in month.list %}
+      <li class="event">
+        <div class="ev-date">
+          <span class="ev-day">{{ e.start_date|date:"j" }}</span>
+          <span class="ev-mon">{{ e.start_date|date:"M" }}</span>
+        </div>
+        <div class="ev-body">
+          {% if e.url %}<a class="headline" href="{{ e.url }}" target="_blank" rel="noopener">{{ e.title }}</a>
+          {% else %}<span class="headline">{{ e.title }}</span>{% endif %}
+          <p class="by">
+            {% if e.is_webinar %}<span class="tag tag-line">Webinar</span>{% endif %}
+            {% if e.city %}<span class="pub">{{ e.city }}</span>{% endif %}
+            {% if e.organizer %}<span>{{ e.organizer }}</span>{% endif %}
+            {% if e.end_date %}<span>until {{ e.end_date|date:"j M" }}</span>{% endif %}
+          </p>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% empty %}
+  <p class="empty">
+    {% if past %}No past events saved.{% else %}No upcoming events yet. Add them in the editor under <strong>Events</strong>.{% endif %}
+  </p>
+  {% endfor %}
+</div>
+{% endblock %}

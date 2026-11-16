@@ -1,0 +1,104 @@
+{% extends "news/base.html" %}
+
+{% block hero %}
+  {% if mode == 'home' and lead %}
+  <section class="hero" aria-label="Top story">
+    <article class="lead">
+      <p class="lead-meta">
+        {% if lead.category %}<span class="tag tag-dark">{{ lead.category.name }}</span>{% endif %}
+        <span>{{ lead.publisher }}, {{ lead.published|date:"j M Y" }}</span>
+        {% if lead.amount_text %}<span class="amt amt-dark">{{ lead.amount_text }}</span>{% endif %}
+      </p>
+      <h1><a href="{{ lead.link }}" target="_blank" rel="noopener">{{ lead.title }}</a></h1>
+      <p class="lead-actions">
+        <a class="read" href="{{ lead.link }}" target="_blank" rel="noopener">Read at {{ lead.publisher }}</a>
+        {% if lead.also %}
+          <span class="lead-also">Also reported by
+            {% for x in lead.also|slice:":3" %}<a href="{{ x.link }}" target="_blank" rel="noopener">{{ x.publisher }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</span>
+        {% endif %}
+      </p>
+    </article>
+
+    {% if top %}
+    <aside class="top" aria-label="Top headlines">
+      <h2>Top headlines</h2>
+      <ol>
+        {% for t in top %}
+        <li>
+          <a href="{{ t.link }}" target="_blank" rel="noopener">{{ t.title }}</a>
+          <span class="src">{{ t.publisher }}{% if t.article_count > 1 %}, {{ t.article_count }} reports{% endif %}</span>
+        </li>
+        {% endfor %}
+      </ol>
+    </aside>
+    {% endif %}
+  </section>
+  {% else %}
+    {{ block.super }}
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+{% if mode == 'home' and sections %}
+<section class="topic-grid" aria-label="Stories by topic">
+  {% for sec in sections %}
+  <div class="topic-block">
+    <h2><a href="/category/{{ sec.name }}/">{{ sec.name }}</a></h2>
+    <ul>
+      {% for s in sec.stories %}
+      <li>
+        <a href="{{ s.link }}" target="_blank" rel="noopener">{{ s.title }}</a>
+        <span class="src">{{ s.publisher }}{% if s.amount_text %}, {{ s.amount_text }}{% endif %}</span>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endfor %}
+</section>
+{% endif %}
+
+<div class="layout">
+  <main>
+    <div class="feed-head">
+      <h2>{% if mode == 'home' %}Latest{% elif q %}Search results{% else %}{{ heading }}{% endif %}</h2>
+    </div>
+    <ul class="feed">
+      {% for s in items %}
+        {% include "news/_row.html" %}
+      {% empty %}
+      <li class="empty">
+        {% if q %}No headlines match “{{ q }}”. Try a shorter word, such as a firm name.
+        {% else %}No stories here yet. Run <code>python manage.py fetch_news</code> to collect some.{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+  </main>
+
+  <aside class="rail" aria-label="Browse">
+    <h2>Topics</h2>
+    <ul>
+      <li><a href="/" class="{% if mode == 'home' and not current %}is-active{% endif %}"><span>All news</span><b>{{ total }}</b></a></li>
+      {% for c in categories %}
+      <li><a href="/category/{{ c.name }}/" class="{% if c.name == current %}is-active{% endif %}"><span>{{ c.name }}</span><b>{{ c.n }}</b></a></li>
+      {% endfor %}
+    </ul>
+    {% if markets %}
+    <h2 class="rail-gap">Markets</h2>
+    <ul>
+      {% for m in markets %}
+      <li><a href="/markets/{{ m.slug }}/" class="{% if m.slug == current_market %}is-active{% endif %}"><span>{{ m.name }}</span><b>{{ m.n }}</b></a></li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+
+    <form class="signup" method="post" action="/subscribe/">
+      {% csrf_token %}
+      <h2 class="rail-gap">Daily email</h2>
+      <p>The top fund stories, once a day.</p>
+      <label class="sr" for="rail-email">Email address</label>
+      <input id="rail-email" type="email" name="email" placeholder="you@example.com" required>
+      <button type="submit">Subscribe</button>
+    </form>
+  </aside>
+</div>
+{% endblock %}
