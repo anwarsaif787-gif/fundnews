@@ -13,6 +13,6 @@ urlpatterns = [
     path('closes/', views.closes, name='closes'),
     path('about/', views.about, name='about'),
     path('subscribe/', views.subscribe, name='subscribe'),
-    path('refresh/<str:token>/', views.refresh, name='refresh'),
+    path('refresh/<path:token>/', views.refresh, name='refresh'),
     path('feed.xml', views.LatestStories(), name='feed'),
 ]
