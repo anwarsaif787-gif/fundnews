@@ -69,8 +69,18 @@ FUND_RE = re.compile(
     r'endowment|portfolio|commitments?|co-invest\w*|carried interest|aum|raises?|raised)\b', re.I)
 
 
+# A company announcing its own spending, such as "Amazon to invest $7 bn in energy".
+CORP_RE = re.compile(
+    r'\b(to invest|will invest|plans to invest|invests?)\s+(rs\.?|inr|usd|[$€£₹])?\s*[\d.,]+\s*'
+    r'(bn|billion|mn|million|crore|cr|lakh|m|b)?\s+(in|into)\b', re.I)
+FUNDISH_RE = re.compile(
+    r'\b(funds?|private equity|venture|buyouts?|lps?|start-?ups?|portfolio|asset manage\w+)\b', re.I)
+
+
 def is_relevant(story):
     """True if the story is about funds or investing (used to filter the home page)."""
+    if CORP_RE.search(story.title) and not FUNDISH_RE.search(story.title):
+        return False
     return bool(story.category_id or story.market_id or story.firms.all()
                 or FUND_RE.search(story.title))
 
