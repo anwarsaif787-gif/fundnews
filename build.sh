@@ -23,4 +23,5 @@ print('Editor login ready:', user.username)
 
 # First batch of stories (does not stop the build if a feed is down).
 python manage.py fetch_news || true
-python manage.py organize || true
+# Regroup all stories with the latest rules (articles are kept).
+python manage.py organize --reset || true

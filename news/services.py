@@ -187,6 +187,7 @@ def find_story(title, published, firm_ids, amount=None):
             (len(common) >= 2 and sim >= 0.4)
             or (shared_firm and len(common) >= 2 and sim >= 0.25)
             or (shared_firm and same_size)
+            or (same_size and any(len(w) >= 5 and not w.isdigit() for w in common))
         )
         if match and sim > best_sim:
             best, best_sim = s, sim
