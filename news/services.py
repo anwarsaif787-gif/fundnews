@@ -51,7 +51,8 @@ GENERIC = set('raise raises raised raising funding fund funds round amt close cl
 NOISE_RE = re.compile(
     r'^\s*(form\s+([0-9]|s-|n-)|sign[ -]?in\b|log[ -]?in\b|subscribe\b)'
     r'|stories about startups|^\s*yourstory\s*\|'
-    r'|\b(daily|weekly|morning|evening)\s+(roundup|round-up|digest|briefing|wrap)\b|\bnews and updates\b', re.I)
+    r'|\b(daily|weekly|morning|evening)\s+(roundup|round-up|digest|briefing|wrap)\b|\bnews and updates\b'
+    r'|\b(startup\s+)?ecosystem\s+profile\b|\bprofile\s+20\d\d\b', re.I)
 
 
 def is_noise(title):
