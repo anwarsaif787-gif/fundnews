@@ -140,8 +140,24 @@ STORAGES = {
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
-MAILERS = {
-    "default": {
-        "BACKEND": "django.core.mail.backends.console.EmailBackend",
-    },
-}
+# Outgoing email. Online, Brevo sends the newsletter (set BREVO_SMTP_KEY in Render).
+# On your own computer, emails are only printed in the terminal.
+BREVO_SMTP_KEY = os.environ.get("BREVO_SMTP_KEY", "").strip()
+if BREVO_SMTP_KEY:
+    MAILERS = {
+        "default": {
+            "BACKEND": "django.core.mail.backends.smtp.EmailBackend",
+            "OPTIONS": {
+                "host": "smtp-relay.brevo.com",
+                "port": 587,
+                "use_tls": True,
+                "username": os.environ.get("BREVO_SMTP_LOGIN", "").strip(),
+                "password": BREVO_SMTP_KEY,
+            },
+        },
+    }
+else:
+    MAILERS = {
+        "default": {"BACKEND": "django.core.mail.backends.console.EmailBackend"},
+    }
+DEFAULT_FROM_EMAIL = os.environ.get("MAIL_FROM", "Fund News <webmaster@localhost>").strip()

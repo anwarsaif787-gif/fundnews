@@ -7,6 +7,7 @@ from django.core.management import call_command
 from django.http import HttpResponse, HttpResponseForbidden
 
 from django.contrib.syndication.views import Feed
+from django.core import signing
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db.models import Count
@@ -239,3 +240,47 @@ def refresh(request, token):
     _last_refresh = time.time()
     threading.Thread(target=_run_refresh, daemon=True).start()
     return HttpResponse('Refresh started', status=202)
+
+
+# ---------- daily newsletter (called by a scheduled job) ----------
+
+_digest_lock = threading.Lock()
+_last_digest = 0.0
+DIGEST_GAP = 20 * 3600  # never send the digest twice within 20 hours
+
+
+def _run_digest(site):
+    try:
+        call_command('send_digest', site=site)
+    finally:
+        _digest_lock.release()
+
+
+def send_digest_hook(request, token):
+    """Starts sending the daily email in the background. Needs the secret token."""
+    global _last_digest
+    if not settings.REFRESH_TOKEN or token != settings.REFRESH_TOKEN:
+        return HttpResponseForbidden('Wrong token')
+    if time.time() - _last_digest < DIGEST_GAP:
+        return HttpResponse('Already sent recently, nothing to do', status=200)
+    if not _digest_lock.acquire(blocking=False):
+        return HttpResponse('A send is already running', status=202)
+    _last_digest = time.time()
+    site = request.build_absolute_uri('/').rstrip('/')
+    threading.Thread(target=_run_digest, args=(site,), daemon=True).start()
+    return HttpResponse('Digest started', status=202)
+
+
+def unsubscribe(request, token):
+    """Removes a subscriber. The link in each email carries a signed address."""
+    try:
+        email = signing.loads(token, salt='unsubscribe')
+    except signing.BadSignature:
+        return HttpResponse('This unsubscribe link is not valid.', status=400)
+    Subscriber.objects.filter(email=email).delete()
+    return HttpResponse(
+        '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+        '<title>Unsubscribed</title>'
+        '<body style="font-family:Georgia,serif;background:#FBF4E4;color:#3B2C1E;max-width:30rem;margin:4rem auto;padding:0 1rem">'
+        '<h1>You are unsubscribed</h1><p>We will not send you any more emails.</p>'
+        '<p><a href="/" style="color:#8F4F12">Back to Fund News</a></p></body>')

@@ -1,0 +1,18 @@
+name: Send daily newsletter
+on:
+  schedule:
+    - cron: "30 2 * * *"   # 08:00 India time
+  workflow_dispatch:
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ask the site to send the daily email
+        env:
+          SITE_URL: ${{ secrets.SITE_URL }}
+          REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
+        run: |
+          SITE=$(echo "$SITE_URL" | tr -d '[:space:]')
+          SITE=${SITE%/}
+          TOKEN=$(echo "$REFRESH_TOKEN" | tr -d '[:space:]')
+          curl -fsS --retry 3 --max-time 120 "$SITE/send-digest/$TOKEN/"
