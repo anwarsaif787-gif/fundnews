@@ -143,7 +143,16 @@ STORAGES = {
 # Outgoing email. Online, Brevo sends the newsletter (set BREVO_SMTP_KEY in Render).
 # On your own computer, emails are only printed in the terminal.
 BREVO_SMTP_KEY = os.environ.get("BREVO_SMTP_KEY", "").strip()
-if BREVO_SMTP_KEY:
+BREVO_API_KEY = os.environ.get("BREVO_API_KEY", "").strip()
+if BREVO_API_KEY:
+    # Render's free plan blocks SMTP, so the site sends through Brevo's web API instead.
+    MAILERS = {
+        "default": {
+            "BACKEND": "news.mailbackend.BrevoAPIBackend",
+            "OPTIONS": {"api_key": BREVO_API_KEY},
+        },
+    }
+elif BREVO_SMTP_KEY:
     MAILERS = {
         "default": {
             "BACKEND": "django.core.mail.backends.smtp.EmailBackend",

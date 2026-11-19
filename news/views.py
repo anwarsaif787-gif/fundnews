@@ -294,13 +294,11 @@ def unsubscribe(request, token):
 def test_email(request):
     """Sends one test email and shows the result or the exact error. Editors only."""
     to = request.GET.get('to', '').strip()
-    opts = settings.MAILERS['default'].get('OPTIONS', {})
-    key = settings.BREVO_SMTP_KEY
+    backend = settings.MAILERS['default']['BACKEND'].rsplit('.', 1)[-1]
+    api_key = settings.BREVO_API_KEY
     info = [
-        f"Backend: {settings.MAILERS['default']['BACKEND'].rsplit('.', 1)[-1]}",
-        f"Host: {opts.get('host', '(none: emails only print in the log)')}",
-        f"Login: {opts.get('username', '')}",
-        f"Key set: {bool(key)}, length {len(key)}, starts with xsmtpsib-: {key.startswith('xsmtpsib-')}",
+        f"Sending method: {backend}",
+        f"Brevo API key set: {bool(api_key)}, length {len(api_key)}, starts with xkeysib-: {api_key.startswith('xkeysib-')}",
         f"From: {settings.DEFAULT_FROM_EMAIL}",
     ]
     if not to:
