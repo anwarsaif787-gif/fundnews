@@ -3,6 +3,8 @@ import time
 from datetime import timedelta
 
 from django.conf import settings
+from django.contrib.admin.views.decorators import staff_member_required
+from django.core.mail import send_mail
 from django.core.management import call_command
 from django.http import HttpResponse, HttpResponseForbidden
 
@@ -284,3 +286,30 @@ def unsubscribe(request, token):
         '<body style="font-family:Georgia,serif;background:#FBF4E4;color:#3B2C1E;max-width:30rem;margin:4rem auto;padding:0 1rem">'
         '<h1>You are unsubscribed</h1><p>We will not send you any more emails.</p>'
         '<p><a href="/" style="color:#8F4F12">Back to Fund News</a></p></body>')
+
+
+# ---------- email test page (editors only) ----------
+
+@staff_member_required
+def test_email(request):
+    """Sends one test email and shows the result or the exact error. Editors only."""
+    to = request.GET.get('to', '').strip()
+    opts = settings.MAILERS['default'].get('OPTIONS', {})
+    key = settings.BREVO_SMTP_KEY
+    info = [
+        f"Backend: {settings.MAILERS['default']['BACKEND'].rsplit('.', 1)[-1]}",
+        f"Host: {opts.get('host', '(none: emails only print in the log)')}",
+        f"Login: {opts.get('username', '')}",
+        f"Key set: {bool(key)}, length {len(key)}, starts with xsmtpsib-: {key.startswith('xsmtpsib-')}",
+        f"From: {settings.DEFAULT_FROM_EMAIL}",
+    ]
+    if not to:
+        info.append("")
+        info.append("Add ?to=your@email.com to the address to send a test email.")
+        return HttpResponse("\n".join(info), content_type='text/plain')
+    try:
+        send_mail('Fund News test email', 'If you can read this, sending works.', None, [to])
+        info.append(f"\nRESULT: sent to {to}. Check the inbox and the spam folder.")
+    except Exception as exc:
+        info.append(f"\nRESULT: FAILED\n{type(exc).__name__}: {exc}")
+    return HttpResponse("\n".join(info), content_type='text/plain')
