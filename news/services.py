@@ -53,7 +53,8 @@ NOISE_RE = re.compile(
     r'|stories about startups|^\s*yourstory\s*\|'
     r'|\b(daily|weekly|morning|evening)\s+(roundup|round-up|digest|briefing|wrap)\b|\bnews and updates\b'
     r'|\b(startup\s+)?ecosystem\s+profile\b|\bprofile\s+20\d\d\b'
-    r'|\b(company|startup|investor)\s+profile\b|\bfunding\s*(&|and)\s*investors\b', re.I)
+    r'|\b(company|startup|investor)\s+profile\b|\bfunding\s*(&|and)\s*investors\b'
+    r'|^\s*latest\s+.{3,60}\bnews\s*\||(\|[^|]*){3,}', re.I)
 
 
 def is_noise(title):
