@@ -183,7 +183,7 @@ def find_story(title, published, firm_ids, amount=None):
         sim = len(common) / len(tok | other)
         shared_firm = bool({f.id for f in s.firms.all()} & firm_ids)
         same_size = bool(amount and s.amount_usd and
-                         abs(amount - s.amount_usd) / max(amount, s.amount_usd) < 0.02)
+                         abs(amount - s.amount_usd) / max(amount, s.amount_usd) < 0.05)
         match = (
             (len(common) >= 2 and sim >= 0.4)
             or (shared_firm and len(common) >= 2 and sim >= 0.25)
