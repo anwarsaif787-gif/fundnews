@@ -192,7 +192,7 @@ def find_story(title, published, firm_ids, amount=None):
         strong = common - WEAK
         sim = len(common) / len(tok | other)
         shared_firm = bool({f.id for f in s.firms.all()} & firm_ids)
-        tol = 0.06 if RUPEE_RE.search(title) else 0.02
+        tol = 0.06 if (RUPEE_RE.search(title) or RUPEE_RE.search(s.title)) else 0.02
         same_size = bool(amount and s.amount_usd and
                          abs(amount - s.amount_usd) / max(amount, s.amount_usd) < tol)
         if s.article_count >= 8:
