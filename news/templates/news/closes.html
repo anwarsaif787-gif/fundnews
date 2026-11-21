@@ -37,7 +37,7 @@
         {% for s in rows %}
         <tr>
           <td>
-            <a href="{{ s.link }}" target="_blank" rel="noopener">{{ s.title }}</a>
+            <a href="{{ s.url }}">{{ s.title }}</a>
             <span class="src">{% for f in s.firms.all %}{{ f.name }}{% if not forloop.last %}, {% endif %}{% empty %}{{ s.publisher }}{% endfor %}</span>
           </td>
           <td>{{ s.market.name|default:"Other" }}</td>

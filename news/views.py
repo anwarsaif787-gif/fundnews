@@ -1,3 +1,4 @@
+import html as htmllib
 import threading
 import time
 from datetime import timedelta
@@ -15,9 +16,10 @@ from django.core.validators import validate_email
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.html import strip_tags
 from django.views.decorators.http import require_POST
 
-from .models import Category, Event, Firm, Market, Source, Story, Subscriber
+from .models import Article, Category, Event, Firm, Market, Source, Story, Subscriber
 from .services import ROUND_RE, format_usd, is_fund_close, is_relevant, tidy
 
 
@@ -39,7 +41,37 @@ def decorate(stories):
                 seen.add(pub)
                 s.also.append({'publisher': pub, 'link': a.link})
         s.amount_text = format_usd(s.amount_usd)
+        pks = [a.pk for a in s.articles.all()]
+        s.url = f"/story/{min(pks)}/" if pks else s.link
     return stories
+
+
+def clean_summary(raw, title):
+    text = htmllib.unescape(strip_tags(raw or ''))
+    text = ' '.join(text.split())
+    if len(text) < 50 or text.lower().startswith(title.lower()[:40]) and len(text) < len(title) + 40:
+        return ''
+    return text if len(text) <= 520 else text[:520].rsplit(' ', 1)[0] + '…'
+
+
+def story_page(request, pk):
+    article = get_object_or_404(Article.objects.select_related('story'), pk=pk)
+    if not article.story_id:
+        return redirect(article.link)
+    story = decorate([story_qs().get(pk=article.story_id)])[0]
+    arts = sorted(story.articles.all(), key=lambda a: a.published)
+    notes = []
+    for a in arts:
+        title, pub = tidy(a.title, a.source.name)
+        notes.append({'publisher': pub, 'link': a.link, 'title': title,
+                      'published': a.published, 'text': clean_summary(a.summary, title)})
+    first = notes[0] if notes else {'publisher': story.publisher, 'link': story.link, 'published': story.published}
+    texts = [n for n in notes if n['text']]
+    now = timezone.now()
+    latest = decorate([x for x in story_qs()[:120] if is_relevant(x) and x.pk != story.pk][:10])
+    return render(request, 'news/story.html', base_ctx(
+        request, story=story, first=first, notes=notes, texts=texts[:3],
+        latest=latest, heading=story.title))
 
 
 def base_ctx(request, section='news', **extra):

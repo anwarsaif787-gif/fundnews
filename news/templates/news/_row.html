@@ -4,7 +4,7 @@
     <span class="hm">{{ s.published|date:"H:i" }}</span>
   </time>
   <div class="what">
-    <a class="headline" href="{{ s.link }}" target="_blank" rel="noopener">{{ s.title }}</a>
+    <a class="headline" href="{{ s.url }}">{{ s.title }}</a>
     <p class="by">
       <span class="pub">{{ s.publisher }}</span>
       {% if s.also %}

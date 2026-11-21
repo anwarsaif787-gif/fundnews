@@ -1,0 +1,61 @@
+{% extends "news/base.html" %}
+{% block title %}{{ story.title }} | Fund News{% endblock %}
+
+{% block content %}
+<div class="story-wrap">
+  <article class="story">
+    <p class="crumbs">
+      <a href="/">News</a>
+      {% if story.category %}<span aria-hidden="true">/</span> <a href="/category/{{ story.category.name }}/">{{ story.category.name }}</a>{% endif %}
+    </p>
+    <h1>{{ story.title }}</h1>
+    <p class="story-meta">
+      {{ story.published|date:"l, j F Y" }}. First reported by
+      <a href="{{ first.link }}" target="_blank" rel="noopener">{{ first.publisher }}</a>{% if story.also %}
+      and {{ story.also|length }} other{{ story.also|length|pluralize }}{% endif %}.
+    </p>
+
+    {% for n in texts %}
+      <p class="story-text">{{ n.text }}{% if texts|length > 1 %} <span class="by">{{ n.publisher }}</span>{% endif %}</p>
+    {% empty %}
+      <p class="story-text muted">The publisher has not shared a summary. Use the button below to read the full story.</p>
+    {% endfor %}
+
+    <p><a class="read read-lg" href="{{ story.link }}" target="_blank" rel="noopener">Read the full story at {{ story.publisher }}</a></p>
+
+    <dl class="facts">
+      {% if story.firms.all %}
+      <div><dt>Firms</dt><dd>{% for f in story.firms.all %}<a href="/firms/{{ f.slug }}/">{{ f.name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</dd></div>
+      {% endif %}
+      {% if story.amount_text %}<div><dt>Deal value</dt><dd>{{ story.amount_text }}</dd></div>{% endif %}
+      {% if story.market %}<div><dt>Asset class</dt><dd><a href="/markets/{{ story.market.slug }}/">{{ story.market.name }}</a></dd></div>{% endif %}
+      {% if story.category %}<div><dt>Topic</dt><dd><a href="/category/{{ story.category.name }}/">{{ story.category.name }}</a></dd></div>{% endif %}
+      <div><dt>Reports</dt><dd>{{ notes|length }} publisher{{ notes|length|pluralize }}</dd></div>
+    </dl>
+
+    {% if notes|length > 1 %}
+    <section class="coverage">
+      <h2>Coverage from each publisher</h2>
+      <ul>
+        {% for n in notes %}
+        <li><a href="{{ n.link }}" target="_blank" rel="noopener">{{ n.title }}</a>
+            <span class="by">{{ n.publisher }}, {{ n.published|date:"j M" }}</span></li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+    <p class="muted small">Fund News links to the original reporting and shows short excerpts from each publisher's own feed. We do not write these stories.</p>
+  </article>
+
+  <aside class="latest">
+    <h2>Latest</h2>
+    <ul>
+      {% for s in latest %}
+      <li><a href="{{ s.url }}">{{ s.title }}</a>
+          <span class="by">{{ s.publisher }}, {{ s.published|date:"j M" }}</span></li>
+      {% endfor %}
+    </ul>
+    <p><a href="/">All news, with search and filters</a></p>
+  </aside>
+</div>
+{% endblock %}

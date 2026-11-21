@@ -249,3 +249,32 @@ a.headline:hover { color: var(--amber-ink); text-decoration: underline; text-dec
   .closes th:nth-child(2), .closes td:nth-child(2), .closes th:nth-child(5), .closes td:nth-child(5) { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* ---------- Story page ---------- */
+.story-wrap { max-width: var(--wrap); margin: 0 auto; padding: 36px 24px 72px;
+              display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 3fr); gap: 56px; }
+.crumbs { margin: 0 0 14px; font-size: .9rem; color: var(--amber-ink); font-weight: 600; }
+.crumbs a { text-decoration: none; }
+.crumbs a:hover { text-decoration: underline; }
+.story h1 { margin: 0 0 14px; font-family: var(--serif); font-weight: 700; color: var(--mocha);
+            font-size: clamp(1.9rem, 4vw, 2.9rem); line-height: 1.1; letter-spacing: -.02em; text-wrap: balance; }
+.story-meta { margin: 0 0 28px; color: #6F5B47; font-size: .95rem; }
+.story-meta a { font-weight: 600; color: var(--mocha); }
+.story-text { max-width: 62ch; margin: 0 0 18px; font-size: 1.12rem; line-height: 1.75; }
+.story-text .by, .by { font-size: .85rem; color: #6F5B47; }
+.muted { color: #6F5B47; }
+.small { font-size: .85rem; }
+.read-lg { margin: 10px 0 30px; padding: 14px 24px; background: var(--mocha); color: var(--gold); }
+.read-lg:hover { background: var(--amber); color: var(--espresso); }
+.facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 32px; margin: 0 0 34px;
+         border-top: 2px solid var(--mocha); }
+.facts div { padding: 12px 0; border-bottom: 1px solid var(--line); }
+.facts dt { font-size: .82rem; font-weight: 600; color: var(--amber-ink); }
+.facts dd { margin: 3px 0 0; font-weight: 500; }
+.coverage h2, .latest h2 { margin: 0 0 8px; font-family: var(--serif); font-size: 1.2rem; color: var(--mocha); }
+.coverage ul, .latest ul { list-style: none; margin: 0 0 18px; padding: 0; }
+.coverage li, .latest li { padding: 11px 0; border-bottom: 1px solid var(--line); line-height: 1.4; }
+.coverage li a, .latest li a { display: block; font-weight: 500; text-decoration: none; }
+.coverage li a:hover, .latest li a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.latest { border-top: 4px solid var(--amber); padding-top: 14px; align-self: start; }
+@media (max-width: 860px) { .story-wrap { grid-template-columns: 1fr; gap: 32px; } .facts { grid-template-columns: 1fr; } }

@@ -9,7 +9,7 @@
         <span>{{ lead.publisher }}, {{ lead.published|date:"j M Y" }}</span>
         {% if lead.amount_text %}<span class="amt amt-dark">{{ lead.amount_text }}</span>{% endif %}
       </p>
-      <h1><a href="{{ lead.link }}" target="_blank" rel="noopener">{{ lead.title }}</a></h1>
+      <h1><a href="{{ lead.url }}">{{ lead.title }}</a></h1>
       <p class="lead-actions">
         <a class="read" href="{{ lead.link }}" target="_blank" rel="noopener">Read at {{ lead.publisher }}</a>
         {% if lead.also %}
@@ -25,7 +25,7 @@
       <ol>
         {% for t in top %}
         <li>
-          <a href="{{ t.link }}" target="_blank" rel="noopener">{{ t.title }}</a>
+          <a href="{{ t.url }}">{{ t.title }}</a>
           <span class="src">{{ t.publisher }}{% if t.article_count > 1 %}, {{ t.article_count }} reports{% endif %}</span>
         </li>
         {% endfor %}
@@ -47,7 +47,7 @@
     <ul>
       {% for s in sec.stories %}
       <li>
-        <a href="{{ s.link }}" target="_blank" rel="noopener">{{ s.title }}</a>
+        <a href="{{ s.url }}">{{ s.title }}</a>
         <span class="src">{{ s.publisher }}{% if s.amount_text %}, {{ s.amount_text }}{% endif %}</span>
       </li>
       {% endfor %}

@@ -5,6 +5,7 @@ from news import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home, name='home'),
+    path('story/<int:pk>/', views.story_page, name='story'),
     path('category/<str:category>/', views.category_page, name='category'),
     path('markets/<slug:slug>/', views.market_page, name='market'),
     path('firms/', views.firm_list, name='firms'),
