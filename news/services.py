@@ -162,6 +162,15 @@ def load_context():
     }
 
 
+RUPEE_RE = re.compile(r'₹|\brs\.?\s?\d|\bcrore|\blakh|\binr\b', re.I)
+WEAK = set('startup startups indian india company companies global venture capital '
+           'investment investments investor investors billion million acquires acquire '
+           'acquisition firm firms group partners partner management private equity '
+           'announces announced closes final first second third new latest climate fintech '
+           'healthtech edtech saas software tech technology ai energy health real estate '
+           'infrastructure credit debt growth seed series round'.split())
+
+
 def find_story(title, published, firm_ids, amount=None):
     """Find an existing Story about the same event, or None.
 
@@ -180,15 +189,19 @@ def find_story(title, published, firm_ids, amount=None):
         if not other:
             continue
         common = tok & other
+        strong = common - WEAK
         sim = len(common) / len(tok | other)
         shared_firm = bool({f.id for f in s.firms.all()} & firm_ids)
+        tol = 0.06 if RUPEE_RE.search(title) else 0.02
         same_size = bool(amount and s.amount_usd and
-                         abs(amount - s.amount_usd) / max(amount, s.amount_usd) < 0.05)
+                         abs(amount - s.amount_usd) / max(amount, s.amount_usd) < tol)
+        if s.article_count >= 8:
+            continue  # stop runaway clusters
         match = (
-            (len(common) >= 2 and sim >= 0.4)
-            or (shared_firm and len(common) >= 2 and sim >= 0.25)
+            (len(strong) >= 2 and sim >= 0.4)
+            or (shared_firm and len(strong) >= 2 and sim >= 0.25)
             or (shared_firm and same_size)
-            or (same_size and any(len(w) >= 5 and not w.isdigit() for w in common))
+            or (same_size and any(len(w) >= 5 and not w.isdigit() and w not in WEAK for w in common))
         )
         if match and sim > best_sim:
             best, best_sim = s, sim
