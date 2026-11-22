@@ -20,6 +20,7 @@ from django.utils.html import strip_tags
 from django.views.decorators.http import require_POST
 
 from .models import Article, Category, Event, Firm, Market, Source, Story, Subscriber
+from .summaries import fetch_description
 from .services import ROUND_RE, format_usd, is_fund_close, is_relevant, tidy
 
 
@@ -60,6 +61,13 @@ def story_page(request, pk):
         return redirect(article.link)
     story = decorate([story_qs().get(pk=article.story_id)])[0]
     arts = sorted(story.articles.all(), key=lambda a: a.published)
+    # Fetch a missing summary from the publisher's page the first time a story is opened
+    for a in arts[:3]:
+        if not clean_summary(a.summary, a.title):
+            text = fetch_description(a.link, timeout=5)
+            if text:
+                a.summary = text
+                a.save(update_fields=['summary'])
     notes = []
     for a in arts:
         title, pub = tidy(a.title, a.source.name)
@@ -258,6 +266,7 @@ def _run_refresh():
     try:
         call_command('fetch_news')
         call_command('organize')
+        call_command('fill_summaries', limit=40)
     finally:
         _refresh_lock.release()
 

@@ -25,6 +25,7 @@ print('Editor login ready:', user.username)
 python manage.py fetch_news || true
 # Regroup all stories with the latest rules (articles are kept).
 python manage.py organize --reset || true
+python manage.py fill_summaries --limit 40 || true
 
 # Add upcoming private markets events (safe to repeat; nothing is duplicated).
 python manage.py shell <<'PY' || true
