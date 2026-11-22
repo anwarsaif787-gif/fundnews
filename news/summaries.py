@@ -8,13 +8,30 @@ from urllib.parse import urlparse
 META_RE = re.compile(r'<meta\b[^>]*>', re.I)
 ATTR_RE = re.compile(r'([a-zA-Z:_-]+)\s*=\s*("([^"]*)"|\'([^\']*)\')')
 WANTED = ('og:description', 'twitter:description', 'description')
-SKIP_HOSTS = ('news.google.com', 'google.com')
 UA = 'Mozilla/5.0 (compatible; FundNewsBot/1.0; +https://fundnews.onrender.com/about/)'
 
 
-def fetch_description(url, timeout=6):
+def is_google(url):
     host = urlparse(url).netloc.lower()
-    if not url.startswith('http') or any(host == h or host.endswith('.' + h) for h in SKIP_HOSTS):
+    return host == 'google.com' or host.endswith('.google.com')
+
+
+def resolve_google(url, timeout=8):
+    """Turn a Google News redirect link into the publisher's real article address."""
+    try:
+        from googlenewsdecoder import gnewsdecoder
+        r = gnewsdecoder(url, timeout=timeout)
+        if r.get('success') and r.get('decoded_url'):
+            return r['decoded_url']
+    except Exception:
+        pass
+    return ''
+
+
+def fetch_description(url, timeout=6):
+    if is_google(url):
+        url = resolve_google(url)
+    if not url or not url.startswith('http') or is_google(url):
         return ''
     try:
         req = urllib.request.Request(url, headers={'User-Agent': UA, 'Accept': 'text/html'})
@@ -43,9 +60,11 @@ def fetch_description(url, timeout=6):
 
 def probe(url, timeout=6):
     """Like fetch_description but says what happened. Used by the staff test page."""
-    host = urlparse(url).netloc.lower()
-    if host == 'news.google.com' or host.endswith('.google.com'):
-        return 'skipped: Google News redirect link'
+    if is_google(url):
+        real = resolve_google(url)
+        if not real:
+            return 'failed: could not find the real article address behind the Google News link'
+        url = real
     try:
         req = urllib.request.Request(url, headers={'User-Agent': UA, 'Accept': 'text/html'})
         with urllib.request.urlopen(req, timeout=timeout) as r:
@@ -54,7 +73,7 @@ def probe(url, timeout=6):
             final = r.geturl()
     except Exception as e:
         return f'failed: {type(e).__name__}: {e}'[:200]
-    text = fetch_description(final if final.startswith('http') else url, timeout)
+    text = fetch_description(url, timeout)
     if text:
         return 'OK: ' + text[:120]
     return f'page loaded ({len(raw)} bytes, {ctype[:30]}) but no description tag found'

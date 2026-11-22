@@ -20,7 +20,7 @@ class Command(BaseCommand):
                 todo.append(a)
             if len(todo) >= limit:
                 break
-        with ThreadPoolExecutor(max_workers=8) as pool:
+        with ThreadPoolExecutor(max_workers=4) as pool:
             results = list(pool.map(lambda a: fetch_description(a.link), todo))
         n = 0
         for a, text in zip(todo, results):
