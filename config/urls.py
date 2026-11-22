@@ -17,6 +17,7 @@ urlpatterns = [
     path('refresh/<path:token>/', views.refresh, name='refresh'),
     path('unsubscribe/<path:token>/', views.unsubscribe, name='unsubscribe'),
     path('send-digest/<path:token>/', views.send_digest_hook, name='send_digest'),
+    path('test-summaries/', views.test_summaries, name='test_summaries'),
     path('test-email/', views.test_email, name='test_email'),
     path('feed.xml', views.LatestStories(), name='feed'),
 ]

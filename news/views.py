@@ -20,7 +20,7 @@ from django.utils.html import strip_tags
 from django.views.decorators.http import require_POST
 
 from .models import Article, Category, Event, Firm, Market, Source, Story, Subscriber
-from .summaries import fetch_description
+from .summaries import fetch_description, probe
 from .services import ROUND_RE, format_usd, is_fund_close, is_relevant, tidy
 
 
@@ -352,3 +352,19 @@ def test_email(request):
     except Exception as exc:
         info.append(f"\nRESULT: FAILED\n{type(exc).__name__}: {exc}")
     return HttpResponse("\n".join(info), content_type='text/plain')
+
+
+@staff_member_required
+def test_summaries(request):
+    """Staff-only page: shows what happens when we fetch summaries from publishers."""
+    from concurrent.futures import ThreadPoolExecutor
+    arts = [a for a in Article.objects.select_related('source').order_by('-published')[:200]
+            if not clean_summary(a.summary, a.title)][:10]
+    with ThreadPoolExecutor(max_workers=5) as pool:
+        notes = list(pool.map(lambda a: probe(a.link), arts))
+    total = Article.objects.count()
+    have = sum(1 for a in Article.objects.order_by('-published')[:200] if clean_summary(a.summary, a.title))
+    lines = [f"Of the newest 200 articles, {have} have a summary. Articles in total: {total}.", ""]
+    for a, n in zip(arts, notes):
+        lines.append(f"{a.source.name} | {a.link[:70]}\n    -> {n}")
+    return HttpResponse("\n".join(lines), content_type='text/plain; charset=utf-8')

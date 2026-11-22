@@ -39,3 +39,22 @@ def fetch_description(url, timeout=6):
             if len(text) >= 40:
                 return text[:600]
     return ''
+
+
+def probe(url, timeout=6):
+    """Like fetch_description but says what happened. Used by the staff test page."""
+    host = urlparse(url).netloc.lower()
+    if host == 'news.google.com' or host.endswith('.google.com'):
+        return 'skipped: Google News redirect link'
+    try:
+        req = urllib.request.Request(url, headers={'User-Agent': UA, 'Accept': 'text/html'})
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            ctype = r.headers.get('Content-Type') or ''
+            raw = r.read(250_000)
+            final = r.geturl()
+    except Exception as e:
+        return f'failed: {type(e).__name__}: {e}'[:200]
+    text = fetch_description(final if final.startswith('http') else url, timeout)
+    if text:
+        return 'OK: ' + text[:120]
+    return f'page loaded ({len(raw)} bytes, {ctype[:30]}) but no description tag found'
