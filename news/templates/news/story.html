@@ -18,7 +18,7 @@
     {% for n in texts %}
       <p class="story-text">{{ n.text }}{% if texts|length > 1 %} <span class="by">{{ n.publisher }}</span>{% endif %}</p>
     {% empty %}
-      <p class="story-text muted">The publisher has not shared a summary. Use the button below to read the full story.</p>
+      <p class="story-text muted">Read the full report at {{ story.publisher }} using the button below.</p>
     {% endfor %}
 
     <p><a class="read read-lg" href="{{ story.link }}" target="_blank" rel="noopener">Read the full story at {{ story.publisher }}</a></p>
