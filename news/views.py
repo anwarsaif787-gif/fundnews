@@ -55,6 +55,9 @@ def clean_summary(raw, title):
     return text if len(text) <= 520 else text[:520].rsplit(' ', 1)[0] + '…'
 
 
+_summary_tried = {}  # article id -> time we last tried to fetch its summary
+
+
 def story_page(request, pk):
     article = get_object_or_404(Article.objects.select_related('story'), pk=pk)
     if not article.story_id:
@@ -64,6 +67,9 @@ def story_page(request, pk):
     # Fetch a missing summary from the publisher's page the first time a story is opened
     for a in arts[:3]:
         if not clean_summary(a.summary, a.title):
+            if time.time() - _summary_tried.get(a.pk, 0) < 6 * 3600:
+                continue  # already tried recently; do not slow the page down again
+            _summary_tried[a.pk] = time.time()
             text = fetch_description(a.link, timeout=5)
             if text:
                 a.summary = text
